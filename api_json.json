@@ -1,0 +1,34 @@
+openapi: 3.0.1
+info:
+  title: defaultTitle
+  description: defaultDescription
+  version: '0.1'
+servers:
+  - url: 'http://mock-prediction-citizen-integrator-story.apps.cluster-0858.0858.example.opentlc.com/'
+paths:
+  /predict:
+    get:
+      description: Auto generated using Swagger Inspector
+      parameters:
+        - name: custId
+          in: query
+          schema:
+            type: string
+          example: CUST
+      responses:
+        '200':
+          description: Auto generated using Swagger Inspector
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prediction:
+                    type: string
+              examples:
+                '0':
+                  value: '{ "prediction": "HIGH"}'
+      servers:
+        - url: 'http://mock-prediction-citizen-integrator-story.apps.cluster-0858.0858.example.opentlc.com/'
+    servers:
+      - url: 'http://mock-prediction-citizen-integrator-story.apps.cluster-0858.0858.example.opentlc.com/'
