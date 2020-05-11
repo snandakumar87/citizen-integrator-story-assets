@@ -1,0 +1,41 @@
+First let us deploy a postgres database, we will create the Customer table which will hold basic profile information about the customer. Let us login to the openshift console using the cli tools.
+
+git  clone https://github.com/snandakumar87/citizen-integrator-story-assets
+cd citizen-integrator-story
+
+oc new-app -f postgresql-ephemeral-template.json \
+  -p DATABASE_SERVICE_NAME=customer \
+  -p POSTGRESQL_USER=user \
+  -p POSTGRESQL_PASSWORD=changeit \
+  -p POSTGRESQL_DATABASE=customer
+
+oc get pods | grep customer
+oc rsh customer-xxxxx
+
+Now login to the DB and create the Customer table, we will now add some rows to it. DDL script can be found here.
+
+Next let us deploy a mysql database, we will create the Transaction table which will hold the customer transactions.
+
+oc new-app mysql:5.7 --insecure-registry=true -e MYSQL_USER=user -e MYSQL_PASSWORD=mypassword -e MYSQL_DATABASE=offer
+oc get pods | grep offer
+oc rsh offer-xxxxx
+
+We will now login to the DB and create the transaction table. We will also add some values to this table. DDL script can be found here.
+
+Event Emitter & Mock Prediction API:
+
+We will set up an event emitter which will emit messages every few seconds to simulate customer’s transactions.
+oc new-app centos/python-36-centos7~https://github.com/snandakumar87/txn-emitter-integrator-story \
+          --name=event-emitter \
+          -e KAFKA_BROKERS=my-cluster-kafka-brokers \
+          -e KAFKA_TOPIC=event-input-stream\
+          -e RATE=1 \
+          --name=emitter
+
+We will also setup a mock API service which simulates the prediction service.
+
+oc new-app quay.io/quarkus/ubi-quarkus-native-s2i:19.2.1~https://github.com/snandakumar87/mock-prediction
+  oc cancel-build bc/mock-prediction
+  oc patch bc/api-mock -p '{\"spec\":{\"resources\":{\"limits\":{\"cpu\":\"2\", \"memory\":\"6Gi\"}}}}'
+  oc start-build bc/mock-prediction
+  oc expose svc/mock-prediction
